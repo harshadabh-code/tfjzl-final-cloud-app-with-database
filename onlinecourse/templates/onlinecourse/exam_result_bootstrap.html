@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Exam Result - {{ course.name }}</title>
+</head>
+
+<body>
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Online Course</a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
+                    <a class="btn btn-link" href="{% url 'onlinecourse:logout' %}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Result container -->
+    <div class="container mt-4">
+        <h2>Exam Result for: {{ course.name }}</h2>
+
+        <!-- Pass / Fail Banner -->
+        {% if grade >= 70 %}
+        <div class="alert alert-success mt-3" role="alert">
+            <h4>Congratulations, {{ user.first_name }}! You have successfully passed the exam.</h4>
+            <p class="mb-0">Your Score: <strong>{{ grade }} / 100</strong> ({{ grade }}%) &nbsp;|&nbsp; Passing Grade: 70% &nbsp;|&nbsp; Status: <strong>PASSED</strong></p>
+        </div>
+        {% else %}
+        <div class="alert alert-danger mt-3" role="alert">
+            <h4>Failed</h4>
+            <p class="mb-0">Your Score: <strong>{{ grade }} / 100</strong> ({{ grade }}%) &nbsp;|&nbsp; Passing Grade: 70% &nbsp;|&nbsp; Status: <strong>FAILED</strong></p>
+        </div>
+        {% endif %}
+
+        <!-- Exam Review -->
+        <h4 class="mt-4">Exam Review & Assessment Breakdown:</h4>
+        {% for question in course.question_set.all %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>{{ question.question_text }} <span class="badge badge-secondary float-right">Grade: {{ question.grade }}</span></h5>
+            </div>
+            <div class="card-body">
+                {% for choice in question.choice_set.all %}
+                <div class="form-check my-2">
+                    {% if choice.id in selected_ids and choice.is_correct %}
+                    <span class="text-success font-weight-bold">[X] {{ choice.choice_text }} (Correct - Selected)</span>
+                    {% elif choice.id in selected_ids and not choice.is_correct %}
+                    <span class="text-danger font-weight-bold">[X] {{ choice.choice_text }} (Incorrect - Selected)</span>
+                    {% elif choice.is_correct %}
+                    <span class="text-success">[ ] {{ choice.choice_text }} (Correct Answer)</span>
+                    {% else %}
+                    <span class="text-muted">[ ] {{ choice.choice_text }}</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Navigation Buttons -->
+        <div class="mt-4 mb-5">
+            <a href="{% url 'onlinecourse:course_details' course.id %}" class="btn btn-primary btn-lg">Retake Exam</a>
+            <a href="{% url 'onlinecourse:index' %}" class="btn btn-secondary btn-lg ml-2">Back to Course List</a>
+        </div>
+    </div>
+</body>
+</html>
+
